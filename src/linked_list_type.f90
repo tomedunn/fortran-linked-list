@@ -424,18 +424,7 @@ contains
     type(node), intent(in) :: RHS
 
     if (allocated(LHS%item)) deallocate(LHS%item)
-! COMPILER BUG REGION: GFORTRAN
-    if (allocated(RHS%item)) then
-      select type(item => RHS%item)
-      type is (character(*))
-        continue
-      class default
-        allocate(LHS%item, source=RHS%item)
-      end select
-    end if
-! WHEN FIXED REPLACE BY
-!   if (allocated(RHS%item)) allocate(LHS%item, source=RHS%item)
-! END COMPILER BUG REGION
+   if (allocated(RHS%item)) allocate(LHS%item, source=RHS%item)
   end subroutine node_assign_node_to_node
 !===============================================================================
 
@@ -448,19 +437,7 @@ contains
     class(*), intent(in), optional :: item
     type(node) :: val
 
-! COMPILER BUG REGION: GFORTRAN
-    if (present(item)) then
-      select type(item)
-      type is (character(*))
-        !call node_set_item_character(item, val)
-        allocate(val%item, source=item)
-      class default
-        allocate(val%item, source=item)
-      end select
-    end if
-! WHEN FIXED REPLACE BY
-!   if (present(item)) allocate(val%item, source=item)
-! END COMPILER BUG REGION
+   if (present(item)) allocate(val%item, source=item)
   end function node_constructor
 !===============================================================================
 

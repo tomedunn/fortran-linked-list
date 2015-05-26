@@ -8,13 +8,16 @@ program main
 
   write(*,'("type NODE:")')
   call TEST_type_node(results)
-  write(*,'("  passed ",I0,"/",I0," tests.")') count(results), size(results)
+  write(*,'(2X,"passed ",I0,"/",I0," tests.")') count(results), size(results)
+  if (count(results) /= size(results)) call print_failed_tests(results)
 
   write(*,'("type LIST:")')
   call TEST_type_list(results)
-  write(*,'("  passed ",I0,"/",I0," tests.")') count(results), size(results)
+  write(*,'(2X,"passed ",I0,"/",I0," tests.")') count(results), size(results)
+  if (count(results) /= size(results)) call print_failed_tests(results)
 
 contains
+
 
 !===============================================================================
 ! TEST_type_list:
@@ -31,6 +34,8 @@ contains
     integer      :: iVal
     logical      :: lVal
     real         :: rVal
+    integer      :: stat
+    character(40) :: errmsg
 
     allocate(results(nTests))
     results = .false.
@@ -39,12 +44,11 @@ contains
     results(01) = L%len() == 0
 
     ! character
-! NOTE: CHARACTER ASSIGNMENT IN LIST WON'T WORK DUE TO GFORTRAN COMPILER BUG
     call append(L, 'word')
     results(02) = L%len() == 1
-    call get_item(L, 1, chVal)
+    call get_item(L, 1, chVal, stat=stat, errmsg=errmsg)
+    if (stat /= 0) write(*,'(A)') errmsg
     results(03) = chVal == 'word'
-! END NOTE
 
     ! complex
     call append(L, (1.0,1.0))
@@ -92,7 +96,6 @@ contains
 
     ! character:
     chVal = 'word'
-! NOTE: CHARACTER ASSIGNMENT IN LIST WON'T WORK DUE TO GFORTRAN COMPILER BUG
     nVal = node(chVal)
     results(01) = chVal == nVal
     results(02) = nVal  == chVal
@@ -100,7 +103,6 @@ contains
     results(03) = stat == -1
     call get_item(nVal, chVal, stat=stat)
     results(04) = stat == 0 .and. chVal == 'word'
-! END NOTE
 
     ! complex:
     cVal = (1,1)
@@ -146,6 +148,23 @@ contains
     call get_item(nVal, cVal, stat=stat)
     results(21) = stat == -2
   end subroutine TEST_type_node
+!===============================================================================
+
+
+!===============================================================================
+! print_failed_tests:
+!
+  subroutine print_failed_tests( results )
+    logical, intent(in) :: results(:)
+    ! local variables:
+    integer :: i
+
+    write(*,'(2X,"Failed tests:")', advance='no')
+    do i = 1, size(results)
+      if (.not.results(i)) write(*,'("  "I0)', advance='no') i
+    end do
+    write(*,'("")')
+  end subroutine print_failed_tests
 !===============================================================================
 end program main
 !===============================================================================
