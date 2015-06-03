@@ -20,7 +20,7 @@ module linked_list_type
 
   ! derived types:
   type :: node
-    !private
+    private
     type(node), pointer :: next => null()
     class(*), allocatable :: item
   contains
@@ -431,7 +431,7 @@ contains
 !===============================================================================
 !  node_constructor:
 !
-!    Returns a node constructed from the given item
+!    Returns a node constructed from the given item.
 !
   pure function node_constructor( item ) result( val )
     class(*), intent(in), optional :: item
@@ -439,19 +439,6 @@ contains
 
    if (present(item)) allocate(val%item, source=item)
   end function node_constructor
-!===============================================================================
-
-!===============================================================================
-!  node_set_item_character:
-!
-!    Returns a node constructed from the given item
-!
-  pure subroutine node_set_item_character( item, nVal )
-    character(*), intent(in) :: item
-    type(node), intent(inout) :: nVal
-
-    allocate(nVal%item, source=item)
-  end subroutine node_set_item_character
 !===============================================================================
 
 !===============================================================================
